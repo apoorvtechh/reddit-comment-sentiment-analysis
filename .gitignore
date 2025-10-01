@@ -87,3 +87,5 @@ target/
 
 # Mypy cache
 .mypy_cache/
+/logreg_model.pkl
+/tfidf_vectorizer.pkl

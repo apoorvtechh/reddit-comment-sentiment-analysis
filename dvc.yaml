@@ -1,0 +1,47 @@
+stages:
+  data_ingestion:
+    cmd: python src/data/data_ingestion.py
+    deps:
+    - src/data/data_ingestion.py
+    params:
+    - data_ingestion.test_size
+    outs:
+    - data/raw
+  data_preprocessing:
+    cmd: python src/data/data_preprocessing.py
+    deps:
+    - data/raw/train.csv
+    - data/raw/test.csv
+    - src/data/data_preprocessing.py
+    outs:
+    - data/interim
+  model_building:
+    cmd: python src/model/model_building.py
+    deps:
+      - data/interim/train_processed.csv
+      - src/model/model_building.py
+    params:
+      - model_building.max_features
+      - model_building.ngram_range
+      - model_building.C
+      - model_building.penalty
+      - model_building.solver
+      - model_building.multi_class
+      - model_building.class_weight
+      - model_building.max_iter
+      - model_building.random_state
+      - model_building.smote_random_state
+      - model_building.extra_features
+      - model_building.features_list
+    outs:
+      - logreg_model.pkl
+      - tfidf_vectorizer.pkl
+  model_evaluation:
+    cmd: python src/model/model_evaluation.py
+    deps:
+      - data/interim/train_processed.csv
+      - data/interim/test_processed.csv
+      - src/model/model_evaluation.py
+      - logreg_model.pkl
+      - tfidf_vectorizer.pkl
+      - params.yaml

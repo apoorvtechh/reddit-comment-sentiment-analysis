@@ -1,0 +1,28 @@
+data_ingestion:
+  test_size: 0.2
+model_building:
+  # TF-IDF params
+  ngram_range: [1, 3]
+  max_features: 10000
+
+  # Logistic Regression params
+  C: 1.63
+  penalty: "l1"
+  solver: "liblinear"
+  multi_class: "ovr"
+  class_weight: "balanced"
+  max_iter: 1000
+  random_state: 42
+
+  # SMOTE
+  smote_random_state: 42
+
+  # Handcrafted features
+  extra_features: true
+  features_list:
+    - comment_length
+    - word_count
+    - unique_word_count
+    - num_exclamations
+    - num_questions
+    - sentiment
