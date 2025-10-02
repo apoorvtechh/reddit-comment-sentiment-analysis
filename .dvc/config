@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = C:\Users\apoor\AppData\Local\Temp
+    url = s3://apoorv-mlfow-bucket
