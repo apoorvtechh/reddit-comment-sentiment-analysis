@@ -1,0 +1,22 @@
+artifact_path: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/208823517563159759/models/m-66b9fa5eae6947259c28686d5acfb167/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.9
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.4.0
+model_id: m-66b9fa5eae6947259c28686d5acfb167
+model_size_bytes: 240914
+model_uuid: m-66b9fa5eae6947259c28686d5acfb167
+prompts: null
+run_id: ac682123df7b4879a179d1dd59ba7149
+utc_time_created: '2025-10-02 10:15:28.776723'

@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/208823517563159759/ac682123df7b4879a179d1dd59ba7149/artifacts
+end_time: 1759400156876
+entry_point_name: ''
+experiment_id: '208823517563159759'
+lifecycle_stage: active
+run_id: ac682123df7b4879a179d1dd59ba7149
+run_name: luxuriant-cod-216
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1759400128469
+status: 3
+tags: []
+user_id: apoor

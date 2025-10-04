@@ -1,0 +1,6 @@
+artifact_location: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/208823517563159759
+creation_time: 1759400127989
+experiment_id: '208823517563159759'
+last_update_time: 1759400127989
+lifecycle_stage: active
+name: dvc-pipeline-runs-Reddit-sentiments-analysis

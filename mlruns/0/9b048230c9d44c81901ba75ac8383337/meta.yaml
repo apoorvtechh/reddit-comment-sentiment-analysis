@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/0/9b048230c9d44c81901ba75ac8383337/artifacts
+end_time: 1759398252790
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 9b048230c9d44c81901ba75ac8383337
+run_name: crawling-gull-500
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1759398252565
+status: 3
+tags: []
+user_id: apoor

@@ -89,3 +89,4 @@ target/
 .mypy_cache/
 /logreg_model.pkl
 /tfidf_vectorizer.pkl
+/experiment_info.json

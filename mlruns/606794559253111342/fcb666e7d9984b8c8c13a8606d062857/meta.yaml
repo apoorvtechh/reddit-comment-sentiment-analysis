@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/606794559253111342/fcb666e7d9984b8c8c13a8606d062857/artifacts
+end_time: 1759399581784
+entry_point_name: ''
+experiment_id: '606794559253111342'
+lifecycle_stage: active
+run_id: fcb666e7d9984b8c8c13a8606d062857
+run_name: persistent-stoat-935
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1759399549022
+status: 3
+tags: []
+user_id: apoor

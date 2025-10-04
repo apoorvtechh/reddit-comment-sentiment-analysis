@@ -1,0 +1,10 @@
+artifact_location: file:///D:/datascience/campusx/PROJECTS/reddit-comment-sentiment-analysis/mlruns/606794559253111342/models/m-18cbf6c88cc845f7b75fb59b7c351214/artifacts
+creation_timestamp: 1759399549294
+experiment_id: '606794559253111342'
+last_updated_timestamp: 1759399562551
+model_id: m-18cbf6c88cc845f7b75fb59b7c351214
+model_type: null
+name: logreg_model
+source_run_id: fcb666e7d9984b8c8c13a8606d062857
+status: 2
+status_message: null
