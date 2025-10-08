@@ -1,6 +1,9 @@
 name: CICD Pipeline
 
-on: push
+on:
+  push:
+    branches:
+      - main  # change if your branch is 'dev' or something else
 
 jobs:
   model-deployment:
@@ -11,9 +14,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Cache pip dependencies
         uses: actions/cache@v3
         with:
@@ -21,13 +25,16 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - name: Install dependencies
+
+      - name: Upgrade pip and install dependencies
         run: |
-          pip install -r requirements.txt 
-      - name: Run Pipeline
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Run DVC Pipeline
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-north-1
-        run:
+        run: |
           dvc repro
