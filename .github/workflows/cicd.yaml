@@ -3,110 +3,149 @@ name: CICD Pipeline
 on:
   push:
     branches:
-      - master  # or 'main' if that's your default branch
+      - master   # 👈 or 'main' if that's your default branch
 
 jobs:
   model-deployment:
     runs-on: ubuntu-latest
 
     steps:
-    
-      # ✅ Step 1: Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Fetch all history for accurate git diff:
+    # ======================================================
+    # ✅ STEP 1 — CHECKOUT REPO (with full history)
+    # Needed for accurate git diff between commits
+    # ======================================================
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0   # 🟡 critical for git diff to work correctly
 
-      # ✅ Step 2: Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    # ======================================================
+    # ✅ STEP 2 — SETUP PYTHON
+    # ======================================================
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      # ✅ Step 3: Cache pip dependencies for faster builds
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+    # ======================================================
+    # ✅ STEP 3 — CACHE DEPENDENCIES
+    # Makes repeated builds faster by reusing pip cache
+    # ======================================================
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Upgrade pip and install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
+    - name: Upgrade pip and install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
 
-      # 🟡 Step 4: Detect if DVC pipeline files have changed between commits
-      # 🔸 Added this step to avoid re-running the pipeline unnecessarily for unrelated changes
-      - name: Check for pipeline changes
-        id: check_pipeline
-        run: |
-          git fetch origin ${{ github.ref }}
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          if echo "$CHANGED_FILES" | grep -E '(^dvc\.yaml$|^dvc\.lock$|^params\.yaml$|^data/|^src/)'; then
-            echo "run_dvc=true" >> $GITHUB_ENV
-          else
-            echo "run_dvc=false" >> $GITHUB_ENV
-          fi
+    # ======================================================
+    # 🟡 STEP 4 — CHECK FOR PIPELINE CHANGES
+    # This step detects if files relevant to the DVC/ML pipeline changed.
+    # If not, we skip running the pipeline to save time and S3 bandwidth.
+    # ======================================================
+    - name: Check for pipeline changes
+      id: check_pipeline
+      run: |
+        # Fallback: if no base commit, run pipeline by default (e.g. first push)
+        if [ -z "${{ github.event.before }}" ]; then
+          echo "No base commit detected. Running pipeline by default."
+          echo "run_dvc=true" >> $GITHUB_ENV
+          exit 0
+        fi
 
-      # ✅ Step 5: Run DVC pipeline only when pipeline-relevant files changed
-      # 🔸 This prevents redundant S3 uploads & retraining for every push
-      - name: Run DVC Pipeline
-        if: env.run_dvc == 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-north-1
-          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-        run: |
-          # Optional: skip repro if hashes are unchanged
-          if dvc status -c | grep -q "Data and pipelines are up to date."; then
-            echo "No DVC changes detected. Skipping repro."
-          else
-            dvc repro
-          fi
+        git fetch origin ${{ github.ref }}
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
 
-      # ✅ Step 6: Push DVC-tracked data to remote only when pipeline ran
-      - name: Push DVC-tracked data to remote
-        if: env.run_dvc == 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-north-1
-        run: |
-          dvc push
+        if echo "$CHANGED_FILES" | grep -E '(^dvc\.yaml$|^dvc\.lock$|^params\.yaml$|^data/|^src/)'; then
+          echo "Relevant pipeline changes detected ✅"
+          echo "run_dvc=true" >> $GITHUB_ENV
+        else
+          echo "No relevant pipeline changes detected ⏩"
+          echo "run_dvc=false" >> $GITHUB_ENV
+        fi
 
-      # ✅ Step 7: Configure Git for committing dvc.lock changes
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    # ======================================================
+    # ✅ STEP 5 — RUN DVC PIPELINE IF CHANGES DETECTED
+    # If hashes haven't changed, skip repro.
+    # ======================================================
+    - name: Run DVC Pipeline
+      if: env.run_dvc == 'true'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-north-1
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      run: |
+        if dvc status -c | grep -q "Data and pipelines are up to date."; then
+          echo "No DVC changes detected. Skipping repro."
+        else
+          dvc repro
+        fi
 
-      # ✅ Step 8: Commit only relevant DVC changes
-      # 🔸 Changed to commit ONLY if dvc.lock or pipeline files changed, avoiding empty commits
-      - name: Commit and Push DVC Lockfile Changes
-        if: env.run_dvc == 'true'
-        run: |
-          git add dvc.lock
-          git diff --quiet && git diff --staged --quiet || git commit -m "🔄 Update dvc.lock after pipeline run"
-          git push origin ${{ github.ref_name }}
+    # ======================================================
+    # ✅ STEP 6 — PUSH DVC DATA TO REMOTE
+    # Only runs when DVC pipeline actually ran.
+    # ======================================================
+    - name: Push DVC-tracked data to remote
+      if: env.run_dvc == 'true'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-north-1
+      run: |
+        dvc push
 
-      # ✅ Step 9: Install test dependencies (unchanged)
-      - name: Install test dependencies
-        run: |
-          pip install pytest
+    # ======================================================
+    # ✅ STEP 7 — CONFIGURE GIT
+    # Required for committing lockfile changes in CI.
+    # ======================================================
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      # ✅ Step 10: Run model loading test (unchanged)
-      - name: Run model loading test
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-north-1
-        run: |
-          pytest scripts/test_model_loading.py
-      - name: Run model signature test
-        run: pytest scripts/test_model_signature.py
+    # ======================================================
+    # ✅ STEP 8 — COMMIT DVC LOCKFILE CHANGES (IF ANY)
+    # Avoids empty commits when no changes happened.
+    # ======================================================
+    - name: Commit and Push DVC Lockfile Changes
+      if: env.run_dvc == 'true'
+      run: |
+        git add dvc.lock
+        git diff --quiet && git diff --staged --quiet || git commit -m "🔄 Update dvc.lock after pipeline run"
+        git push origin ${{ github.ref_name }}
 
+    # ======================================================
+    # ✅ STEP 9 — REGISTER MODEL IN MLFLOW (Only if pipeline ran)
+    # This ensures the model is available for tests.
+    # ======================================================
+    - name: Register model in MLflow
+      if: env.run_dvc == 'true'
+      run: python src/model/register_model.py
+
+    # ======================================================
+    # ✅ STEP 10 — INSTALL TEST DEPENDENCIES
+    # ======================================================
+    - name: Install test dependencies
+      run: pip install pytest
+
+    # ======================================================
+    # ✅ STEP 11 — RUN MODEL TESTS
+    # These only run if the pipeline executed and registered a model.
+    # Prevents failures on pushes that didn't modify the pipeline.
+    # ======================================================
+    - name: Run model loading test
+      if: env.run_dvc == 'true'
+      run: pytest scripts/test_model_loading.py
+
+    - name: Run model signature test
+      if: env.run_dvc == 'true'
+      run: pytest scripts/test_model_signature.py
