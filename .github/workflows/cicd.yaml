@@ -149,3 +149,17 @@ jobs:
     - name: Run model signature test
       if: env.run_dvc == 'true'
       run: pytest scripts/test_model_signature.py
+
+    - name: Run model accuracy test
+      if: env.run_dvc == 'true'
+      run: pytest scripts/test_model_accuracy.py
+    - name: Run API tests
+      run: |
+          # Start the Flask app in the background
+           nohup python app.py &
+
+          # Wait a few seconds for the API to start
+           sleep 5
+
+          # Run pytest on your API tests
+           pytest tests/test_api.py

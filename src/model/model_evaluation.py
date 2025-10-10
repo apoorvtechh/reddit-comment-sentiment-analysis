@@ -191,32 +191,21 @@ def main():
             for key, value in params.items():
                 mlflow.log_param(key, value)
 
-            # ------------------------------
-            # ✅ Infer MLflow model signature
-            # ------------------------------
-            # We take a few rows from training data as example input for the signature
-            # Signature stores the expected input schema (columns, dtypes) and output type
+            # ✅ Infer MLflow model signature (unchanged)
             sample_input = train_data.drop(columns=["label"]).head(5)
-            sample_transformed = tfidf.transform(sample_input["comment"])  # assuming your text column is 'comment'
+            sample_transformed = tfidf.transform(sample_input["comment"])
             sample_pred = model.predict(sample_transformed)
-
-            # Create DataFrame to align shape with input features
-            # (If your pipeline uses raw text as input, you can just use sample_input directly)
             signature = infer_signature(
                 model_input=sample_input,
                 model_output=pd.Series(sample_pred)
             )
 
-            # ------------------------------
-            # Log Model + Signature
-            # ------------------------------
             mlflow.sklearn.log_model(
                 sk_model=model,
                 artifact_path="logreg_model",
-                signature=signature  # ✅ added here
+                signature=signature
             )
 
-            # Log vectorizer as artifact (so you can reload it later)
             mlflow.log_artifact(os.path.join(root_dir, "tfidf_vectorizer.pkl"))
 
             # ------------------------------
@@ -225,20 +214,36 @@ def main():
             evaluate_split_with_logging(model, tfidf, train_data, params, split_name="Train")
             evaluate_split_with_logging(model, tfidf, test_data, params, split_name="Test")
 
-            # Save run info for later registration
-            save_model_info(run.info.run_id, "logreg_model", "experiment_info.json")
+            # ⭐ Calculate test accuracy for registration tests
+            from sklearn.metrics import accuracy_score
+            X_test = tfidf.transform(test_data["clean_comment"])
+            y_true = test_data["category"]
+            y_pred = model.predict(X_test)
+            test_accuracy = accuracy_score(y_true, y_pred)
+            mlflow.log_metric("test_accuracy", test_accuracy)
+            logger.info(f"⭐ Test accuracy: {test_accuracy:.4f}")
+
+            # ⭐ Save run info + accuracy for test_model_accuracy.py
+            model_info = {
+                "run_id": run.info.run_id,
+                "model_path": "logreg_model",
+                "accuracy": test_accuracy   # ⭐ added
+            }
+            with open("experiment_info.json", "w") as f:
+                json.dump(model_info, f, indent=4)
 
             # Add descriptive tags
             mlflow.set_tag("model_type", "Logistic Regression")
             mlflow.set_tag("task", "Sentiment Analysis")
             mlflow.set_tag("dataset", "Reddit Comments")
 
-        logger.debug("Evaluation completed successfully")
+        logger.debug("Evaluation completed successfully ✅")
 
     except Exception as e:
         logger.error("Evaluation pipeline failed: %s", e)
         print(f"Error: {e}")
         raise
+
 
 
 
