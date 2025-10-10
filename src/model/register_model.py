@@ -59,24 +59,30 @@ def load_model_info(file_path: str) -> dict:
 # -------------------------------------------------
 def register_model(model_name: str, model_info: dict):
     """
-    Register the model in MLflow Model Registry and transition it to 'Staging'.
+    Register the model in MLflow Model Registry.
+    (✅ Removed stage transition — only register the model version now)
     """
     try:
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
         logger.debug("Model URI to register: %s", model_uri)
 
-        # Register model
+        # ✅ Register model
         model_version = mlflow.register_model(model_uri, model_name)
         logger.info(f"✅ Model '{model_name}' registered with version {model_version.version}")
 
-        # Transition model to 'Staging'
-        client = MlflowClient()
-        client.transition_model_version_stage(
-            name=model_name,
-            version=model_version.version,
-            stage="Staging"
-        )
-        logger.info(f"🚀 Model '{model_name}' version {model_version.version} transitioned to STAGING")
+        # ❌ Removed: Stage transition to 'Staging'
+        # Originally used:
+        # client = MlflowClient()
+        # client.transition_model_version_stage(
+        #     name=model_name,
+        #     version=model_version.version,
+        #     stage="Staging"
+        # )
+        # logger.info(f"🚀 Model '{model_name}' version {model_version.version} transitioned to STAGING")
+        #
+        # 📝 Reason for removal:
+        # Stage transition API was failing with repeated 500 errors on your MLflow server,
+        # and is also deprecated as of MLflow 2.9.0. We now only register the model version.
 
     except Exception as e:
         logger.error("Error during model registration: %s", e)
@@ -93,7 +99,7 @@ def main():
 
         # Name for the model in MLflow Model Registry
         model_name = "reddit_chrome_plugin_model"  
-        # Register and transition the model
+        # Register the model (without stage transition)
         register_model(model_name, model_info)
 
     except Exception as e:

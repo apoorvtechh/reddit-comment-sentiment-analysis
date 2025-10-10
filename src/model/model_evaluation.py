@@ -153,12 +153,24 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
 # -------------------------------------------------
 # Main pipeline
 # -------------------------------------------------
+import os
+import pickle
+import logging
+import mlflow
+import pandas as pd
+from mlflow.models.signature import infer_signature
+from dotenv import load_dotenv
+
+# (Assuming get_root_directory, load_params, load_data, evaluate_split_with_logging, save_model_info, logger are defined above)
+
 def main():
     try:
         root_dir = get_root_directory()
         params = load_params(os.path.join(root_dir, "params.yaml"))["model_building"]
 
-        # Load data
+        # ------------------------------
+        # Load Data
+        # ------------------------------
         train_data = load_data(os.path.join(root_dir, "data/interim/train_processed.csv"))
         test_data = load_data(os.path.join(root_dir, "data/interim/test_processed.csv"))
 
@@ -168,27 +180,55 @@ def main():
         with open(os.path.join(root_dir, "logreg_model.pkl"), "rb") as f:
             model = pickle.load(f)
 
-        # 🔑 Configure MLflow
+        # ------------------------------
+        # MLflow Tracking Setup
+        # ------------------------------
         mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
         mlflow.set_experiment("dvc-pipeline-runs-Reddit-sentiments-analysis")
 
         with mlflow.start_run() as run:
-            # Log params
+            # ✅ Log all model-building parameters
             for key, value in params.items():
                 mlflow.log_param(key, value)
 
-            # Log model and vectorizer
-            mlflow.sklearn.log_model(model, "logreg_model")
+            # ------------------------------
+            # ✅ Infer MLflow model signature
+            # ------------------------------
+            # We take a few rows from training data as example input for the signature
+            # Signature stores the expected input schema (columns, dtypes) and output type
+            sample_input = train_data.drop(columns=["label"]).head(5)
+            sample_transformed = tfidf.transform(sample_input["comment"])  # assuming your text column is 'comment'
+            sample_pred = model.predict(sample_transformed)
+
+            # Create DataFrame to align shape with input features
+            # (If your pipeline uses raw text as input, you can just use sample_input directly)
+            signature = infer_signature(
+                model_input=sample_input,
+                model_output=pd.Series(sample_pred)
+            )
+
+            # ------------------------------
+            # Log Model + Signature
+            # ------------------------------
+            mlflow.sklearn.log_model(
+                sk_model=model,
+                artifact_path="logreg_model",
+                signature=signature  # ✅ added here
+            )
+
+            # Log vectorizer as artifact (so you can reload it later)
             mlflow.log_artifact(os.path.join(root_dir, "tfidf_vectorizer.pkl"))
 
-            # Evaluate with MLflow logging
+            # ------------------------------
+            # Evaluate model and log metrics
+            # ------------------------------
             evaluate_split_with_logging(model, tfidf, train_data, params, split_name="Train")
             evaluate_split_with_logging(model, tfidf, test_data, params, split_name="Test")
 
-            # Save run info
+            # Save run info for later registration
             save_model_info(run.info.run_id, "logreg_model", "experiment_info.json")
 
-            # Tags
+            # Add descriptive tags
             mlflow.set_tag("model_type", "Logistic Regression")
             mlflow.set_tag("task", "Sentiment Analysis")
             mlflow.set_tag("dataset", "Reddit Comments")
@@ -199,6 +239,7 @@ def main():
         logger.error("Evaluation pipeline failed: %s", e)
         print(f"Error: {e}")
         raise
+
 
 
 if __name__ == "__main__":
