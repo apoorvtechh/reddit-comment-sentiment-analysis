@@ -160,7 +160,7 @@ jobs:
 
 
           # Wait a few seconds for the API to start
-           sleep 5
+           sleep 100
 
           # Run pytest on your API tests
            pytest tests/test_api.py
