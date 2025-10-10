@@ -192,14 +192,13 @@ def main():
                 mlflow.log_param(key, value)
 
             # ✅ Infer MLflow model signature (unchanged)
-            sample_input = train_data.drop(columns=["label"]).head(5)
-            sample_transformed = tfidf.transform(sample_input["comment"])
+            sample_input = train_data[["clean_comment"]].head(5)
+            sample_transformed = tfidf.transform(sample_input["clean_comment"])
             sample_pred = model.predict(sample_transformed)
             signature = infer_signature(
                 model_input=sample_input,
                 model_output=pd.Series(sample_pred)
-            )
-
+             )
             mlflow.sklearn.log_model(
                 sk_model=model,
                 artifact_path="logreg_model",
