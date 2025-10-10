@@ -4,7 +4,7 @@ import pytest
 from mlflow.tracking import MlflowClient
 import os
 from dotenv import load_dotenv
-
+import time
 load_dotenv()
 
 # Set remote/local MLflow tracking URI
@@ -15,6 +15,8 @@ mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
 ])
 def test_load_latest_model(model_name):
     client = MlflowClient()
+    # ⏸️ Wait a few seconds to allow model registration to reflect
+    time.sleep(15)
 
     # ✅ Get all versions of the model
     versions = client.search_model_versions(f"name='{model_name}'")
