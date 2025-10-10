@@ -156,7 +156,8 @@ jobs:
     - name: Run API tests
       run: |
           # Start the Flask app in the background
-           nohup python app.py &
+           nohup python flask_app/app.py &
+
 
           # Wait a few seconds for the API to start
            sleep 5
