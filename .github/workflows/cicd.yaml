@@ -3,15 +3,21 @@ name: CICD Pipeline
 on:
   push:
     branches:
-      - master   # 👈 or 'main' if that's your default branch
+      - master   # or 'main' if that's your default branch
 
 jobs:
   model-deployment:
     runs-on: ubuntu-latest
 
+    env:
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-north-1
+
     steps:
     # ======================================================
-    # ✅ STEP 1 — CHECKOUT REPO (with full history)
+    # ✅ STEP 1 — CHECKOUT REPO
     # ======================================================
     - name: Checkout code
       uses: actions/checkout@v3
@@ -72,11 +78,6 @@ jobs:
     # ======================================================
     - name: Run DVC Pipeline
       if: env.run_dvc == 'true'
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-north-1
-        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
       run: |
         if dvc status -c | grep -q "Data and pipelines are up to date."; then
           echo "No DVC changes detected. Skipping repro."
@@ -89,12 +90,7 @@ jobs:
     # ======================================================
     - name: Push DVC-tracked data to remote
       if: env.run_dvc == 'true'
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-north-1
-      run: |
-        dvc push
+      run: dvc push
 
     # ======================================================
     # ✅ STEP 7 — CONFIGURE GIT
@@ -105,7 +101,7 @@ jobs:
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
     # ======================================================
-    # ✅ STEP 8 — COMMIT DVC LOCKFILE CHANGES (IF ANY)
+    # ✅ STEP 8 — COMMIT DVC LOCKFILE CHANGES
     # ======================================================
     - name: Commit and Push DVC Lockfile Changes
       if: env.run_dvc == 'true'
@@ -143,22 +139,11 @@ jobs:
       run: pytest scripts/test_model_accuracy.py
 
     # ======================================================
-    # 🚫 STEP 12 — API TESTING (COMMENTED OUT)
-    # Takes too long to download model in CI currently
+    # ✅ STEP 12 — DOCKER BUILD & PUSH TO ECR
     # ======================================================
-    # - name: Run API tests
-    #   run: |
-    #     # Start the Flask app in the background
-    #     nohup python flask_app/app.py &
-    #     # Wait for the API to start (model download takes time)
-    #     sleep 100
-    #     # Run pytest on your API tests
-    #     pytest tests/test_api.py
     - name: Login to AWS ECR
       if: success()
       run: |
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 193311515551.dkr.ecr.eu-north-1.amazonaws.com
 
     - name: Build Docker Image
