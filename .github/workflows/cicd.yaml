@@ -3,17 +3,11 @@ name: CICD Pipeline
 on:
   push:
     branches:
-      - master   
+      - master   # 👈 Change if your default branch is 'main'
 
 jobs:
   model-deployment:
     runs-on: ubuntu-latest
-
-    env:
-      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: eu-north-1
 
     steps:
     # ======================================================
@@ -49,7 +43,7 @@ jobs:
         pip install -r requirements.txt
 
     # ======================================================
-    # 🟡 STEP 4 — CHECK FOR PIPELINE CHANGES
+    # 🟡 STEP 4 — CHECK PIPELINE CHANGES (DVC)
     # ======================================================
     - name: Check for pipeline changes
       id: check_pipeline
@@ -74,10 +68,15 @@ jobs:
         fi
 
     # ======================================================
-    # ✅ STEP 5 — RUN DVC PIPELINE
+    # ✅ STEP 5 — RUN DVC PIPELINE (IF NEEDED)
     # ======================================================
     - name: Run DVC Pipeline
       if: env.run_dvc == 'true'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-north-1
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
       run: |
         if dvc status -c | grep -q "Data and pipelines are up to date."; then
           echo "No DVC changes detected. Skipping repro."
@@ -85,75 +84,60 @@ jobs:
           dvc repro
         fi
 
-    # ======================================================
-    # ✅ STEP 6 — PUSH DVC DATA TO REMOTE
-    # ======================================================
     - name: Push DVC-tracked data to remote
       if: env.run_dvc == 'true'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-north-1
       run: dvc push
 
     # ======================================================
-    # ✅ STEP 7 — CONFIGURE GIT
-    # ======================================================
-    - name: Configure Git
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-    # ======================================================
-    # ✅ STEP 8 — COMMIT DVC LOCKFILE CHANGES
-    # ======================================================
-    - name: Commit and Push DVC Lockfile Changes
-      if: env.run_dvc == 'true'
-      run: |
-        git add dvc.lock
-        git diff --quiet && git diff --staged --quiet || git commit -m "🔄 Update dvc.lock after pipeline run"
-        git push origin ${{ github.ref_name }}
-
-    # ======================================================
-    # ✅ STEP 9 — REGISTER MODEL IN MLFLOW
+    # ✅ STEP 6 — REGISTER MODEL IN MLFLOW
     # ======================================================
     - name: Register model in MLflow
       if: env.run_dvc == 'true'
+      env:
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
       run: python src/model/register_model.py
 
     # ======================================================
-    # ✅ STEP 10 — INSTALL TEST DEPENDENCIES
+    # ✅ STEP 7 — INSTALL TEST DEPENDENCIES & RUN TESTS
     # ======================================================
     - name: Install test dependencies
       run: pip install pytest
 
-    # ======================================================
-    # ✅ STEP 11 — RUN MODEL TESTS
-    # ======================================================
-    - name: Run model loading test
+    - name: Run model tests
       if: env.run_dvc == 'true'
-      run: pytest scripts/test_model_loading.py
-
-    - name: Run model signature test
-      if: env.run_dvc == 'true'
-      run: pytest scripts/test_model_signature.py
-
-    - name: Run model accuracy test
-      if: env.run_dvc == 'true'
-      run: pytest scripts/test_model_accuracy.py
+      env:
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        pytest scripts/test_model_loading.py
+        pytest scripts/test_model_signature.py
+        pytest scripts/test_model_accuracy.py
 
     # ======================================================
-    # ✅ STEP 12 — DOCKER BUILD & PUSH TO ECR
+    # ✅ STEP 8 — LOGIN TO ECR
     # ======================================================
     - name: Login to AWS ECR
-      if: success()
       run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 193311515551.dkr.ecr.eu-north-1.amazonaws.com
 
+    # ======================================================
+    # ✅ STEP 9 — BUILD DOCKER IMAGE (from ECR base)
+    # ======================================================
     - name: Build Docker Image
-      if: success()
       run: docker build -t reddit_chrome_plugin:latest .
 
+    # ======================================================
+    # ✅ STEP 10 — TAG AND PUSH TO ECR
+    # ======================================================
     - name: Tag Docker Image
-      if: success()
       run: docker tag reddit_chrome_plugin:latest 193311515551.dkr.ecr.eu-north-1.amazonaws.com/reddit_chrome_plugin:latest
 
     - name: Push Docker Image to ECR
-      if: success()
       run: docker push 193311515551.dkr.ecr.eu-north-1.amazonaws.com/reddit_chrome_plugin:latest
