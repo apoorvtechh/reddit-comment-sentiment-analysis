@@ -3,7 +3,7 @@ name: CICD Pipeline
 on:
   push:
     branches:
-      - master   # or 'main' if that's your default branch
+      - master   
 
 jobs:
   model-deployment:
