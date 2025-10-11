@@ -154,3 +154,22 @@ jobs:
     #     sleep 100
     #     # Run pytest on your API tests
     #     pytest tests/test_api.py
+    - name: Login to AWS ECR
+      if: success()
+      run:
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 193311515551.dkr.ecr.eu-north-1.amazonaws.com
+
+    - name: Build Docker Image 
+      if: success()
+      run:
+        docker build -t reddit-comment-sentiment-analysis:latest .
+    - name: Tag Docker Image
+      if: success()
+      run:
+        docker tag reddit_chrome_plugin:latest 193311515551.dkr.ecr.eu-north-1.amazonaws.com/reddit_chrome_plugin:latest
+    - name: Push Docker Image to ECR
+      if: success()
+      run:
+        docker push 193311515551.dkr.ecr.eu-north-1.amazonaws.com/reddit_chrome_plugin:latest

@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+env/
+venv/
+myenv/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+.env
+*.csv
+*.xlsx
+data/
