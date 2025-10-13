@@ -90,3 +90,5 @@ logreg_model.pkl
 
 # Ignore data files (if tracked by DVC)
 data/
+# Ignore TF-IDF vectorizer artifact
+tfidf_vectorizer.pkl
