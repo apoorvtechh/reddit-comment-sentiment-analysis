@@ -215,7 +215,7 @@ def main():
             # 7️⃣ Save run info for test_model_accuracy.py
             save_model_info(run.info.run_id, "logreg_model", "experiment_info.json", test_accuracy)
 
-            # Add descriptive tags
+            # add additional tags
             mlflow.set_tag("model_type", "Logistic Regression")
             mlflow.set_tag("task", "Sentiment Analysis")
             mlflow.set_tag("dataset", "Reddit Comments")
