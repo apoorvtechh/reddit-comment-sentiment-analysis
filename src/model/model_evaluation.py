@@ -204,13 +204,13 @@ def main():
             X_test_extra = create_text_features(test_data["clean_comment"], params["features_list"])
             X_test_extra_scaled = scaler.transform(X_test_extra)
             X_test_tfidf = tfidf.transform(test_data["clean_comment"])
-            X_test_combined = hstack([X_test_tfidf, X_test_extra_scaled])
+            X_test_combined = hstack([X_test_tfidf, X_test_extra_scaled])# added
 
             y_true = test_data["category"]
             y_pred = model.predict(X_test_combined)
             test_accuracy = accuracy_score(y_true, y_pred)
             mlflow.log_metric("test_accuracy", test_accuracy)
-            logger.info(f"⭐ Test accuracy: {test_accuracy:.4f}")
+            logger.info(f"⭐ Test accuracy: {test_accuracy:.4f}")# added
 
             # 7️⃣ Save run info for test_model_accuracy.py
             save_model_info(run.info.run_id, "logreg_model", "experiment_info.json", test_accuracy)
