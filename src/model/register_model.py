@@ -98,7 +98,7 @@ def main():
         model_info = load_model_info(model_info_path)# aded
 
         # Name for the model in MLflow Model Registry
-        model_name = "reddit_chrome_plugin_model"  
+        model_name = "reddit_chrome_plugin_model"  # added
         # Register the model (without stage transition)
         register_model(model_name, model_info)
 

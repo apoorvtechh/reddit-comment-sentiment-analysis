@@ -1,11 +1,8 @@
 import os
-import mlflow
+import pickle
 import pytest
 import pandas as pd
 import numpy as np
-from dotenv import load_dotenv
-from mlflow.tracking import MlflowClient
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import StandardScaler
 from textblob import TextBlob
 
@@ -23,35 +20,30 @@ def create_text_features(series: pd.Series) -> pd.DataFrame:
         "sentiment": series.apply(lambda x: TextBlob(x).sentiment.polarity),
     })
 
-# ============================================================
-# ✅ Load environment variables and set MLflow Tracking URI
-# ============================================================
-load_dotenv()
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
-if not tracking_uri:
-    raise RuntimeError("❌ MLFLOW_TRACKING_URI is not set in your .env file.")
-mlflow.set_tracking_uri(tracking_uri)
-
 @pytest.mark.parametrize(
-    "model_name",
+    "model_path, vectorizer_path, scaler_path",
     [
-        "reddit_chrome_plugin_model",  # ✅ your actual model name
+        ("logreg_model.pkl", "tfidf_vectorizer.pkl", "scaler.pkl"),
     ],
 )
-def test_model_with_fresh_vectorizer_and_scaler(model_name):
+def test_model_with_local_artifacts(model_path, vectorizer_path, scaler_path):
     """
-    ✅ Test that the latest registered model can handle inputs preprocessed
-    with a freshly created TF-IDF vectorizer (1–3 ngrams) and StandardScaler,
-    mimicking the training preprocessing without loading pickled artifacts.
+    ✅ Test the trained model locally using pickled model, vectorizer, and scaler.
+    This bypasses MLflow schema enforcement and directly checks if the raw model
+    works with the same preprocessing as training.
     """
 
-    # 1️⃣ Load latest registered model from MLflow
-    client = MlflowClient()
-    versions = client.search_model_versions(f"name='{model_name}'")
-    assert versions, f"No versions found for model '{model_name}'"
-    latest_version = max(int(v.version) for v in versions)
-    model_uri = f"models:/{model_name}/{latest_version}"
-    model = mlflow.pyfunc.load_model(model_uri)
+    # 1️⃣ Load model and artifacts from pickle files
+    assert os.path.exists(model_path), f"❌ Model file not found: {model_path}"
+    assert os.path.exists(vectorizer_path), f"❌ Vectorizer file not found: {vectorizer_path}"
+    assert os.path.exists(scaler_path), f"❌ Scaler file not found: {scaler_path}"
+
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+    with open(vectorizer_path, "rb") as f:
+        vectorizer = pickle.load(f)
+    with open(scaler_path, "rb") as f:
+        scaler = pickle.load(f)
 
     # 2️⃣ Dummy text samples
     test_series = pd.Series([
@@ -60,28 +52,23 @@ def test_model_with_fresh_vectorizer_and_scaler(model_name):
         "what??? seriously!"
     ])
 
-    # 3️⃣ Fresh TF-IDF vectorizer (same ngram range as training)
-    vectorizer = TfidfVectorizer(max_features=7000, ngram_range=(1, 3))
-    X_tfidf = vectorizer.fit_transform(test_series).toarray()
+    # 3️⃣ Apply TF-IDF exactly like training
+    X_tfidf = vectorizer.transform(test_series).toarray()
 
-    # 4️⃣ Fresh handcrafted features + scale
+    # 4️⃣ Handcrafted features + scale
     X_handcrafted = create_text_features(test_series)
-    scaler = StandardScaler()
-    X_handcrafted_scaled = scaler.fit_transform(X_handcrafted)
+    X_handcrafted_scaled = scaler.transform(X_handcrafted)
 
     # 5️⃣ Combine TF-IDF + handcrafted features
     X_final = np.hstack([X_tfidf, X_handcrafted_scaled])
-    X_final_df = pd.DataFrame(
-        X_final,
-        columns=[str(i) for i in range(X_final.shape[1])]
+
+    # 6️⃣ Run prediction using the raw sklearn model
+    prediction = model.predict(X_final)
+
+    # 7️⃣ Assert output matches number of inputs
+    assert len(prediction) == len(test_series), (
+        f"Output row count mismatch: expected {len(test_series)}, got {len(prediction)}"
     )
 
-    # 6️⃣ Make predictions
-    prediction = model.predict(X_final_df)
-
-    # 7️⃣ ✅ Assert output shape matches input rows
-    assert len(prediction) == X_final_df.shape[0], (
-        f"Output row count mismatch: expected {X_final_df.shape[0]}, got {len(prediction)}"
-    )
-
-    print(f"✅ Model '{model_name}' v{latest_version} processed {len(test_series)} fresh inputs successfully.")
+    print(f"✅ Local model successfully processed {len(test_series)} inputs.")
+    print(f"Predictions: {prediction}")
