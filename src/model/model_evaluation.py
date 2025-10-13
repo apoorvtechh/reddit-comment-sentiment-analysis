@@ -170,7 +170,7 @@ def main():
         with mlflow.start_run() as run:
             # Log training params
             for key, value in params.items():
-                mlflow.log_param(key, value)
+                mlflow.log_param(key, value)#added
 
             # 4️⃣ Signature inference — replicate full feature pipeline (TF-IDF + handcrafted)
             sample_input = train_data[["clean_comment"]].head(5)
