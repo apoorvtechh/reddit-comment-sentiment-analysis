@@ -85,3 +85,8 @@ target/
 *.swp
 *.swo
 
+# Ignore model artifacts
+logreg_model.pkl
+
+# Ignore data files (if tracked by DVC)
+data/
