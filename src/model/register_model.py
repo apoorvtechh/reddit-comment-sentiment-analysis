@@ -12,7 +12,7 @@ load_dotenv()
 
 # 🔑 Configure MLflow
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
-mlflow.set_experiment("dvc-pipeline-runs-Reddit-sentiments-analysis")
+mlflow.set_experiment("dvc-pipeline-runs-Reddit-sentiments-analysis")# added
 
 # -------------------------------------------------
 # Logging Configuration
