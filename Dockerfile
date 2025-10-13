@@ -33,5 +33,5 @@ COPY scaler.pkl /app/scaler.pkl
 # ================================
 # 5️⃣ Expose port and set default command
 # ================================
-EXPOSE 5000
-CMD ["python", "app.py"]
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]

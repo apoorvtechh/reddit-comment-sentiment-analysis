@@ -144,3 +144,13 @@ jobs:
 
     - name: Push Docker Image to ECR
       run: docker push 193311515551.dkr.ecr.eu-north-1.amazonaws.com/reddit_chrome_plugin:latest
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ~
+          chmod +x deploy.sh
+          ./deploy.sh
