@@ -220,7 +220,7 @@ def main():
             mlflow.set_tag("task", "Sentiment Analysis")
             mlflow.set_tag("dataset", "Reddit Comments")
 
-        logger.debug("Evaluation completed successfully ✅")
+        logger.debug("Evaluation completed successfully ✅")# adeed
 
     except Exception as e:
         logger.error("Evaluation pipeline failed: %s", e)
