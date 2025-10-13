@@ -2,6 +2,7 @@ import os
 import mlflow
 import pytest
 import pandas as pd
+import numpy as np
 from mlflow.tracking import MlflowClient
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -47,8 +48,8 @@ mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 def test_model_signature(model_name):
     """
     ✅ Test that the latest registered MLflow model can handle input
-    matching its saved signature. Uses freshly created TF-IDF and scaler
-    on the sample text to mimic expected schema.
+    by recreating TF-IDF (1-3 ngrams) and handcrafted features,
+    scaling them, and passing the combined numeric array to the model.
     """
 
     client = MlflowClient()
@@ -71,18 +72,22 @@ def test_model_signature(model_name):
     try:
         model = mlflow.pyfunc.load_model(model_uri)
     except Exception as e:
-        pytest.fail(f"❌ Failed to load model '{model_name}' v{latest_version}: {e}")
+        pytest.fail(f"❌ Failed to load model '{model_name}' v{latest_version} from MLflow: {e}")
 
     # ============================================================
-    # 🧪 Prepare test input & mimic preprocessing
+    # 🧪 Prepare test input and features
     # ============================================================
     test_text = pd.Series(["This is awesome!", "This is terrible."])
 
-    # Fresh TF-IDF vectorizer (fit only on test text)
-    tfidf_vectorizer = TfidfVectorizer(max_features=10)
+    # 1️⃣ TF-IDF features with 1-3 grams
+    tfidf_vectorizer = TfidfVectorizer(
+        max_features=7000,
+        ngram_range=(1, 3),        # <--- ✅ changed here
+        analyzer="word"
+    )
     X_tfidf = tfidf_vectorizer.fit_transform(test_text).toarray()
 
-    # Create handcrafted numeric features
+    # 2️⃣ Handcrafted numeric features
     feature_list = [
         "comment_length",
         "word_count",
@@ -93,26 +98,22 @@ def test_model_signature(model_name):
     ]
     X_handcrafted = create_text_features(test_text, feature_list)
 
-    # Scale handcrafted features
+    # 3️⃣ Scale numeric features
     scaler = StandardScaler()
     X_handcrafted_scaled = scaler.fit_transform(X_handcrafted)
 
-    # Note: We don't need to concat these for model.predict,
-    # because the MLflow model contains its own preprocessing.
-    # We're just mimicking the same schema locally for verification.
-
-    # Build final test DataFrame for prediction
-    test_input = pd.DataFrame({"clean_comment": test_text})
+    # 4️⃣ Concatenate TF-IDF and numeric features
+    X_test_final = np.hstack([X_tfidf, X_handcrafted_scaled])
 
     # ============================================================
-    # 🚀 Run prediction
+    # 🚀 Run prediction using numeric array
     # ============================================================
     try:
-        predictions = model.predict(test_input)
-        assert len(predictions) == len(test_input), (
-            f"Expected {len(test_input)} predictions, got {len(predictions)}"
+        predictions = model.predict(X_test_final)
+        assert len(predictions) == len(test_text), (
+            f"Expected {len(test_text)} predictions, got {len(predictions)}"
         )
-        print(f"✅ Model '{model_name}' v{latest_version} successfully handled signature input with fresh TF-IDF & scaler.")
+        print(f"✅ Model '{model_name}' v{latest_version} successfully handled numeric input (1–3 ngrams TF-IDF + features).")
     except Exception as e:
         pytest.fail(
             f"❌ Model signature test failed for '{model_name}' v{latest_version}: {e}"

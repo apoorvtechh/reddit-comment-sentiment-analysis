@@ -94,7 +94,7 @@ def evaluate_split_with_logging(model, tfidf, data, params, scaler, split_name="
 
     # Handcrafted features (same as training)
     if params.get("extra_features", True):
-        X_extra = create_text_features(X_raw, params["features_list"])
+        X_extra = create_text_features(X_raw, params["features_list"])# added
         X_extra_scaled = scaler.transform(X_extra)
     else:
         X_extra_scaled = None
