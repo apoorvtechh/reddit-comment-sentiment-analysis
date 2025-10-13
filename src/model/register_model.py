@@ -95,7 +95,7 @@ def main():
     try:
         # Path to the model info file generated during training
         model_info_path = "experiment_info.json"
-        model_info = load_model_info(model_info_path)
+        model_info = load_model_info(model_info_path)# aded
 
         # Name for the model in MLflow Model Registry
         model_name = "reddit_chrome_plugin_model"  
