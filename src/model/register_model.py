@@ -103,7 +103,7 @@ def main():
         register_model(model_name, model_info)
 
     except Exception as e:
-        logger.error("Failed to complete model registration: %s", e)
+        logger.error("Failed to complete model registration: %s", e)# added
         print(f"Error: {e}")
 
 # -------------------------------------------------
