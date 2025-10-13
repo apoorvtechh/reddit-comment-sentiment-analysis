@@ -55,7 +55,7 @@ def load_data(file_path: str) -> pd.DataFrame:
     df.dropna(subset=["clean_comment", "category"], inplace=True)
     # Remap -1 → 2 for negative, 0 for neutral, 1 for positive
     df["category"] = df["category"].map({-1: 2, 0: 0, 1: 1})
-    logger.debug("Data loaded: %s rows from %s", df.shape[0], file_path)
+    logger.debug("Data loaded: %s rows from %s", df.shape[0], file_path)# added
     return df
 
 def create_text_features(series: pd.Series, features_list: list) -> pd.DataFrame:
