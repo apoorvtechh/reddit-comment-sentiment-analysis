@@ -85,7 +85,7 @@ def register_model(model_name: str, model_info: dict):
         # and is also deprecated as of MLflow 2.9.0. We now only register the model version.
 
     except Exception as e:
-        logger.error("Error during model registration: %s", e)
+        logger.error("Error during model registration: %s", e)# added
         raise
 
 # -------------------------------------------------
