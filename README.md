@@ -36,9 +36,6 @@ The project is designed to be fully reproducible and deployment-ready.
 
 reddit-comment-sentiment-analysis
 
-
-End-to-end machine learning pipeline for delivery ETA prediction using DVC, MLflow, and modular data workflows.
-
 Project Organization
 ------------
 
