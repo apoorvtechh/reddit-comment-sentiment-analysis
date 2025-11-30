@@ -3,7 +3,8 @@ A complete end-to-end Machine Learning project that classifies Reddit comments i
 This repository includes data preprocessing, EDA, DVC pipelines, ML model training, CI/CD, Docker deployment, and production-ready scripts.
 
 ## 🚀 Project Overview
-This project follows a production-grade MLOps workflow:
+This project follows a production-grade MLOps workflow: 
+
 1)Automated data versioning using DVC  
 
 2)Modular ML training pipeline
