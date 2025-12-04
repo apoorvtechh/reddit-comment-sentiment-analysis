@@ -1,96 +1,75 @@
-## 📘 Reddit Comment Sentiment Analysis
-A complete end-to-end Machine Learning project that classifies Reddit comments into Positive, Negative, and Neutral sentiment.
-This repository includes data preprocessing, EDA, DVC pipelines, ML model training, CI/CD, Docker deployment, and production-ready scripts.
+# 📘 Reddit Comment Sentiment Analysis  
+A complete end-to-end Machine Learning system that classifies Reddit comments into **Positive**, **Negative**, and **Neutral** sentiments.  
+Built with full **MLOps**, including DVC pipelines, automated ML workflow, CI/CD, Docker deployment, and production-ready scripts.
 
-## 🚀 Project Overview
-This project follows a production-grade MLOps workflow: 
+---
 
-1)Automated data versioning using DVC  
+# 🚀 Project Overview  
+This project implements a **production-grade NLP sentiment classification system**, delivering a clean and automated ML pipeline with:
 
-2)Modular ML training pipeline
+- ✔ Automated **data versioning** using DVC  
+- ✔ Modular **ML training pipeline**  
+- ✔ Advanced **NLP preprocessing**  
+- ✔ TF-IDF vectorization  
+- ✔ Models trained → **KNN, Logistic Regression, Random Forest, XGBoost, SVM**  
+- ✔ Hyperparameter tuning  
+- ✔ Automated evaluation & reporting  
+- ✔ Docker deployment  
+- ✔ CI/CD automation  
 
-3)Full NLP preprocessing pipeline
+---
 
-4)TF-IDF vectorization
+# 🧠 Models Used  
+Models trained and evaluated:
 
-5)Multiple ML models (LR, SVM, RF, XGBoost)
+- **KNN Classifier**  
+- **Logistic Regression**  
+- **Random Forest Classifier**  
+- **XGBoost Classifier**  
+- **SVM**
 
-6)Hyperparameter tuning
+### ⭐ Best Model: **SVM + TF-IDF**
+- Highest accuracy  
+- Strong generalization  
+- Best performance across sentiments  
 
-7)Automated evaluation
+---
 
-8)Docker container for deployment
+# 🧵 NLP Preprocessing Pipeline  
+Includes:
 
-9)CI/CD pipeline for automated build + deploy
+- Text cleaning  
+- Tokenization  
+- Stopword removal  
+- Lemmatization  
+- TF-IDF vectorization  
+- Sparse feature handling  
 
-## Pipeline stages 
-### clean – clean raw Reddit comments
-### preprocess – tokenization, stopword removal, lemmatization
-### vectorize – convert text into TF-IDF features
-### train – train ML model
-### evaluate – evaluate and log metric
-### push – push model & data versions to remote storage
+---
 
+# 🏗️ DVC Pipeline Workflow  
 
-## 📂 Folder Structure
-The project is designed to be fully reproducible and deployment-ready.
+### 📦 **Stages Included**
+1️⃣ **clean** – Clean raw Reddit comments  
+2️⃣ **preprocess** – NLP pipeline (tokenization, stopwords, lemmatization)  
+3️⃣ **vectorize** – Convert text to TF-IDF  
+4️⃣ **train** – Train models (KNN, LR, RF, XGB, SVM)  
+5️⃣ **evaluate** – Evaluate & generate metrics  
+6️⃣ **push** – Push updated versions to DVC remote  
 
-reddit-comment-sentiment-analysis
+---
 
-Project Organization
-------------
+### 🟩 Chrome Plugin Repo  
+👉 **Reddit YouTube Plugin**  
+https://github.com/apoorvtechh/reddit-yt-plugin  
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+### 🟧 Experimentation Repo  
+👉 **Experimentation Notebook Repository**  
+https://github.com/apoorvtechh/Second_project  
 
+---
 
---------
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
-
-
-
-
+# 👨‍💻 Author  
+**Apoorv Gupta**  
+Email: **apoorvtechh@gmail.com**  
 
