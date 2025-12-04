@@ -19,16 +19,12 @@ This project implements a **production-grade NLP sentiment classification system
 
 ---
 
-# 🧠 Models Used  
-Models trained and evaluated:
-
-- **KNN Classifier**  
+# 🧠 Model Used  
+Model trained and evaluated:
 - **Logistic Regression**  
-- **Random Forest Classifier**  
-- **XGBoost Classifier**  
-- **SVM**
 
-### ⭐ Best Model: **SVM + TF-IDF**
+
+### ⭐ Best Model: **Logistic Regression + TF-IDF**
 - Highest accuracy  
 - Strong generalization  
 - Best performance across sentiments  
@@ -53,7 +49,7 @@ Includes:
 1️⃣ **clean** – Clean raw Reddit comments  
 2️⃣ **preprocess** – NLP pipeline (tokenization, stopwords, lemmatization)  
 3️⃣ **vectorize** – Convert text to TF-IDF  
-4️⃣ **train** – Train models (KNN, LR, RF, XGB, SVM)  
+4️⃣ **train** – Train model
 5️⃣ **evaluate** – Evaluate & generate metrics  
 6️⃣ **push** – Push updated versions to DVC remote  
 
