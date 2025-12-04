@@ -69,7 +69,7 @@ https://github.com/apoorvtechh/reddit-yt-plugin
 https://github.com/apoorvtechh/Second_project  
 
 ### 🟨 Project Synopsis  
-👉 **Full Project Synopsis (Well-Structured Writeup)**  
+👉 **Full Project Synopsis**  
 https://github.com/apoorvtechh/synopsis  
  
 ---
