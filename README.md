@@ -58,19 +58,20 @@ Includes:
 6️⃣ **push** – Push updated versions to DVC remote  
 
 ---
+# 🔗 Project Repositories  
 
 ### 🟩 Chrome Plugin Repo  
 👉 **Reddit YouTube Plugin**  
 https://github.com/apoorvtechh/reddit-yt-plugin  
 
 ### 🟧 Experimentation Repo  
-👉 **Experimentation Notebook Repository**  
+👉 **NLP Experimentation Repository**  
 https://github.com/apoorvtechh/Second_project  
-
 
 ### 🟨 Project Synopsis  
 👉 **Full Project Synopsis (Well-Structured Writeup)**  
 https://github.com/apoorvtechh/synopsis  
+ 
 ---
 
 # 👨‍💻 Author  
