@@ -67,6 +67,10 @@ https://github.com/apoorvtechh/reddit-yt-plugin
 👉 **Experimentation Notebook Repository**  
 https://github.com/apoorvtechh/Second_project  
 
+
+### 🟨 Project Synopsis  
+👉 **Full Project Synopsis (Well-Structured Writeup)**  
+https://github.com/apoorvtechh/synopsis  
 ---
 
 # 👨‍💻 Author  
