@@ -1,76 +1,84 @@
-# 📘 Reddit Comment Sentiment Analysis  
-A complete end-to-end Machine Learning system that classifies Reddit comments into **Positive**, **Negative**, and **Neutral** sentiments.  
-Built with full **MLOps**, including DVC pipelines, automated ML workflow, CI/CD, Docker deployment, and production-ready scripts.
+# Reddit Comment Sentiment Analysis
+
+An end-to-end Machine Learning system for classifying Reddit comments into **Positive**, **Negative**, and **Neutral** sentiments.  
+Designed as a production-ready NLP project with a complete **MLOps workflow**, including DVC pipelines, automated training, CI/CD, Docker deployment, and reproducible experiments.
+
+**Project Synopsis:** https://synopsis-yqdbpufcczaocxsai2zp3w.streamlit.app/
 
 ---
 
-# 🚀 Project Overview  
-This project implements a **production-grade NLP sentiment classification system**, delivering a clean and automated ML pipeline with:
+## Project Overview
 
-- ✔ Automated **data versioning** using DVC  
-- ✔ Modular **ML training pipeline**  
-- ✔ Advanced **NLP preprocessing**  
-- ✔ TF-IDF vectorization  
-- ✔ Models trained → **KNN, Logistic Regression, Random Forest, XGBoost, SVM**  
-- ✔ Hyperparameter tuning  
-- ✔ Automated evaluation & reporting  
-- ✔ Docker deployment  
-- ✔ CI/CD automation  
+This project implements a **production-grade sentiment classification system** with a clean, modular, and fully automated ML pipeline.
 
----
+Key capabilities include:
 
-# 🧠 Model Used  
-Model trained and evaluated:
-- **Logistic Regression**  
-
-
-### ⭐ Best Model: **Logistic Regression + TF-IDF**
-- Highest accuracy  
-- Strong generalization  
-- Best performance across sentiments  
+- Automated data versioning using DVC  
+- Modular and reproducible ML training pipeline  
+- Advanced NLP preprocessing workflow  
+- TF-IDF feature extraction  
+- Multiple model experimentation:
+  - KNN  
+  - Logistic Regression  
+  - Random Forest  
+  - XGBoost  
+  - Support Vector Machine (SVM)  
+- Hyperparameter tuning and model comparison  
+- Automated evaluation and metric reporting  
+- Dockerized deployment setup  
+- CI/CD-ready project structure  
 
 ---
 
-# 🧵 NLP Preprocessing Pipeline  
-Includes:
+## Model Used
 
-- Text cleaning  
+Models trained and evaluated during experimentation:
+
+- Logistic Regression  
+
+### Best Model: Logistic Regression with TF-IDF
+
+- Achieved the highest accuracy among tested models  
+- Demonstrated strong generalization performance  
+- Delivered consistent results across all sentiment classes  
+
+---
+
+## NLP Preprocessing Pipeline
+
+The text processing workflow includes:
+
+- Text cleaning and normalization  
 - Tokenization  
 - Stopword removal  
 - Lemmatization  
 - TF-IDF vectorization  
-- Sparse feature handling  
+- Efficient sparse feature handling  
 
 ---
 
-# 🏗️ DVC Pipeline Workflow  
+## DVC Pipeline Workflow
 
-### 📦 **Stages Included**
-1️⃣ **clean** – Clean raw Reddit comments  
-2️⃣ **preprocess** – NLP pipeline (tokenization, stopwords, lemmatization)  
-3️⃣ **vectorize** – Convert text to TF-IDF  
-4️⃣ **train** – Train model
-5️⃣ **evaluate** – Evaluate & generate metrics  
-6️⃣ **push** – Push updated versions to DVC remote  
+The project uses a fully automated DVC pipeline to ensure reproducibility and traceability.
+
+### Pipeline Stages
+
+1. **clean** – Clean and normalize raw Reddit comments  
+2. **preprocess** – Apply NLP preprocessing (tokenization, stopwords, lemmatization)  
+3. **vectorize** – Transform text into TF-IDF features  
+4. **train** – Train sentiment classification models  
+5. **evaluate** – Generate evaluation metrics and reports  
+6. **push** – Push updated data and models to the DVC remote  
 
 ---
-# 🔗 Project Repositories  
 
-### 🟩 Chrome Plugin Repo  
-👉 **Reddit YouTube Plugin**  
-https://github.com/apoorvtechh/reddit-yt-plugin  
+## Project Repositories
 
-### 🟧 Experimentation Repo  
-👉 **NLP Experimentation Repository**  
-https://github.com/apoorvtechh/Second_project  
+- **Main Project Repository:**  
+  https://github.com/apoorvtechh/reddit-comment-sentiment-analysis  
 
-### 🟨 Project Synopsis  
-👉 **Full Project Synopsis**  
-https://github.com/apoorvtechh/synopsis  
- 
----
+- **Chrome Extension Repository:**  
+  https://github.com/apoorvtechh/reddit-yt-plugin  
 
-# 👨‍💻 Author  
-**Apoorv Gupta**  
-Email: **apoorvtechh@gmail.com**  
-
+- **Experimentation Repository:**  
+  https://github.com/apoorvtechh/Second_project  
